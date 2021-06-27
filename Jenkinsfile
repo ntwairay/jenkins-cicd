@@ -8,9 +8,6 @@ def configuration = [vaultUrl: 'http://vault0:8200',  vaultCredentialId: 'vault-
                       
 pipeline {
     agent any
-    environment {
-        VAULT_ADDR = 'http://vault0:8200'
-    }
     options {
         buildDiscarder(logRotator(numToKeepStr: '20'))
         disableConcurrentBuilds()
@@ -19,10 +16,13 @@ pipeline {
       stage('Vault') {
         steps {
           withVault([configuration: configuration, vaultSecrets: secrets]) {
-            sh "echo ${env.PRIVATE_TOKEN}"
-            sh "echo ${env.PUBLIC_TOKEN}"
-            sh "echo ${env.API_KEY}"
-            sh "vault status -address ${env.VAULT_ADDR}"
+            sh """
+             echo ${env.PRIVATE_TOKEN}
+             echo ${env.PUBLIC_TOKEN}
+             echo ${env.API_KEY}
+             export VAULT_ADDR=http://vault0:8200
+             vault status
+            """
           }
         }  
       }
